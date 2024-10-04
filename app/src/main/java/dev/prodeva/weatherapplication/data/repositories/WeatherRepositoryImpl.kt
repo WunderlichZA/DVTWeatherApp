@@ -22,13 +22,13 @@ class WeatherRepositoryImpl @Inject constructor(
                 emit(Resource.Loading(true))
                 val response = weatherAPI.getWeatherUpdate(lat, lon, Constants.apiKey)
                 println("WeatherRepositoryImpl" + response.errorBody())
-                if (response.isSuccessful){
+                if (response.isSuccessful) {
                     emit(Resource.Loading(false))
                     emit(Resource.Success(response.body()))
-                }else{
+                } else {
                     emit(Resource.Error(response.message()))
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
                 println(e.message)
             }

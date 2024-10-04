@@ -14,24 +14,22 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dagger.hilt.android.AndroidEntryPoint
+import dev.prodeva.weatherapplication.presentation.weather.WeatherForecastScreen
 import dev.prodeva.weatherapplication.presentation.CoarseLocationPermissionTextProvider
-import dev.prodeva.weatherapplication.presentation.CurrentWeatherUiState
 import dev.prodeva.weatherapplication.presentation.FineLocationPermissionTextProvider
 import dev.prodeva.weatherapplication.presentation.LoadingIndicator
 import dev.prodeva.weatherapplication.presentation.PermissionDialog
+import dev.prodeva.weatherapplication.presentation.WeatherForecastUiState
 import dev.prodeva.weatherapplication.presentation.WeatherViewModel
 import dev.prodeva.weatherapplication.ui.theme.WeatherApplicationTheme
 
@@ -68,7 +66,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WeatherApplicationTheme {
 
-                val weatherForecastUiState by weatherViewModel.currentWeatherFlow.collectAsStateWithLifecycle()
+                val weatherForecastUiState by weatherViewModel.weatherForecastFlow.collectAsStateWithLifecycle()
 
                 val dialogQueue = weatherViewModel.visiblePermissionDialogQueue
 
@@ -84,47 +82,29 @@ class MainActivity : ComponentActivity() {
                     }
                 )
 
-                when (weatherForecastUiState) {
-                    is CurrentWeatherUiState.Loading -> {
-                        LoadingIndicator()
-                    }
-                    is CurrentWeatherUiState.CurrentWeather -> {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            /* (weatherForecastUiState as WeatherForecastUiState.WeatherForecast).weatherForecast?.get(
-                                 0
-                             )?.let { Text(text = it.dayOfWeek) }
-                             (weatherForecastUiState as WeatherForecastUiState.WeatherForecast).weatherForecast?.get(
-                                 0
-                             )?.let { Text(text = it.weatherMain) }
-                             (weatherForecastUiState as WeatherForecastUiState.WeatherForecast).weatherForecast?.get(
-                                 0
-                             )?.let { Text(text = it.weatherTemperature) }*/
-                            Text(text = (weatherForecastUiState as CurrentWeatherUiState.CurrentWeather).currentWeather?.main?.temp_max.toString())
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    when (weatherForecastUiState) {
+                        WeatherForecastUiState.Loading -> LoadingIndicator()
+                        is WeatherForecastUiState.WeatherForecast -> {
+                            (weatherForecastUiState as WeatherForecastUiState.WeatherForecast).weatherForecast?.let { weatherList ->
+                                WeatherForecastScreen(
+                                    fiveDayForecastList = weatherList,
+                                    modifier = Modifier.padding(innerPadding),
+                                )
+                            }
                         }
-                    }
 
-                    is CurrentWeatherUiState.Error -> {
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            (weatherForecastUiState as CurrentWeatherUiState.Error).errorMessage?.let { Text(text = it) }
+                        is WeatherForecastUiState.Error -> {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(text = "${(weatherForecastUiState as WeatherForecastUiState.Error).errorMessage}")
+                            }
                         }
+
                     }
                 }
-
-
-
-
-               /* Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }*/
 
                 dialogQueue
                     .reversed()
@@ -164,20 +144,4 @@ fun Activity.openAppSettings() {
         Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
         Uri.fromParts("package", packageName, null)
     ).also(::startActivity)
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WeatherApplicationTheme {
-        Greeting("Android")
-    }
 }
