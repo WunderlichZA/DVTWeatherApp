@@ -13,5 +13,6 @@ interface WeatherAPI {
 
     @GET("forecast?")
     suspend fun getFiveDayForecast(@Query("lat") lat : Double, @Query("lon") lon: Double,
-                                   @Query("appid") apikey : String) : Response<FiveDayForecast>
+                                   @Query("appid") apikey : String,
+                                   @Query("units") units : String) : Response<FiveDayForecast>
 }

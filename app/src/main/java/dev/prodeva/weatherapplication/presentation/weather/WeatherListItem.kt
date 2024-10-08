@@ -31,6 +31,8 @@ fun WeatherListItem(
     weather : WeatherForecast
 ){
     println("WeatherListItem: ${weather.weatherDate.toLocalDate()} ")
+
+
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -49,7 +51,9 @@ fun WeatherListItem(
         )
 
         Row(
-            modifier = modifier.fillMaxWidth().padding(12.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Image(

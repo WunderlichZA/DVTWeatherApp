@@ -41,7 +41,7 @@ class WeatherRepositoryImpl @Inject constructor(
     ): Flow<Resource<FiveDayForecast>> {
         return flow {
             emit(Resource.Loading(true))
-            val response = weatherAPI.getFiveDayForecast(lat, lon, Constants.apiKey)
+            val response = weatherAPI.getFiveDayForecast(lat, lon, Constants.apiKey, Constants.units)
             if(response.isSuccessful){
                 emit(Resource.Loading(false))
                 emit(Resource.Success(response.body()))
